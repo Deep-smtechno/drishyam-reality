@@ -12,7 +12,6 @@ import {
   Search,
   ArrowUpRight,
   Pencil,
-  Archive,
   X,
   Upload,
   LoaderCircle,
@@ -107,7 +106,7 @@ export function AdminDashboard({
   const [lead, setLead] = useState<Lead>();
   const [removeLead, setRemoveLead] = useState<Lead>();
   const [review, setReview] = useState<Testimonial & { approved?: boolean }>();
-  const [archive, setArchive] = useState<Property>();
+  const [toggling, setToggling] = useState("");
   const [saving, setSaving] = useState(false);
   const [masters, setMasters] = useState<Master[]>([]);
   const loadMasters = useCallback(async () => {
@@ -208,23 +207,25 @@ export function AdminDashboard({
       setSaving(false);
     }
   }
-  async function doArchive() {
-    if (!archive) return;
-    setSaving(true);
+  async function toggleProperty(p: Property) {
+    const active = p.status !== "Available";
+    setToggling(p.id);
+    setError("");
     try {
       await request("/api/admin/properties", {
-        method: "DELETE",
-        body: JSON.stringify({ id: archive.id }),
+        method: "PATCH",
+        body: JSON.stringify({ id: p.id, active }),
       });
-      setArchive(undefined);
       setMessage(
-        "Property archived. You can restore it by changing its status.",
+        active
+          ? `“${p.title}” is now on and visible on the website.`
+          : `“${p.title}” is now off and hidden from the website.`,
       );
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to archive.");
+      setError(e instanceof Error ? e.message : "Unable to update.");
     } finally {
-      setSaving(false);
+      setToggling("");
     }
   }
   const filtered = properties.filter((p) =>
@@ -531,17 +532,22 @@ export function AdminDashboard({
                             >
                               <ArrowUpRight size={16} />
                             </a>
-                            {user.role === "ADMIN" &&
-                              p.status !== "Archived" && (
-                                <button
-                                  className="danger"
-                                  aria-label={`Archive ${p.title}`}
-                                  title="Archive"
-                                  onClick={() => setArchive(p)}
-                                >
-                                  <Archive size={16} />
-                                </button>
-                              )}
+                            <button
+                              type="button"
+                              role="switch"
+                              className="adm-switch"
+                              aria-checked={p.status === "Available"}
+                              aria-label={`${p.title} is ${p.status === "Available" ? "on" : "off"}`}
+                              title={
+                                p.status === "Available"
+                                  ? "On: visible on website. Click to turn off."
+                                  : `Off (${p.status}). Click to turn on.`
+                              }
+                              disabled={toggling === p.id}
+                              onClick={() => void toggleProperty(p)}
+                            >
+                              <span />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -841,39 +847,6 @@ export function AdminDashboard({
                 onClick={doDeleteLead}
               >
                 {saving ? "Deleting…" : "Delete enquiry"}
-              </button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-      <Dialog.Root
-        open={!!archive}
-        onOpenChange={(v) => {
-          if (!v) setArchive(undefined);
-        }}
-      >
-        <Dialog.Portal>
-          <Dialog.Overlay className="dialog-overlay adm-overlay" />
-          <Dialog.Content className="dialog-content adm adm-dialog narrow">
-            <div className="adm-dialog-head">
-              <div>
-                <Dialog.Title className="adm-dialog-title">
-                  Archive this listing?
-                </Dialog.Title>
-                <Dialog.Description className="adm-dialog-desc">
-                  “{archive?.title}” will be removed from the public website.
-                  You can restore it later by changing its status.
-                </Dialog.Description>
-              </div>
-            </div>
-            <div className="adm-dialog-foot">
-              <Dialog.Close className="adm-btn">Keep property</Dialog.Close>
-              <button
-                className="adm-btn danger"
-                disabled={saving}
-                onClick={doArchive}
-              >
-                {saving ? "Archiving…" : "Archive property"}
               </button>
             </div>
           </Dialog.Content>

@@ -127,3 +127,26 @@ export async function DELETE(request: Request) {
     return apiError(e);
   }
 }
+export async function PATCH(request: Request) {
+  try {
+    sameOrigin(request);
+    const user = await requireAdmin();
+    const { id, active } = await readBody(request);
+    if (typeof id !== "string")
+      throw new HttpError(400, "Property ID is required.");
+    if (typeof active !== "boolean")
+      throw new HttpError(400, "Choose on or off.");
+    await executeProcedure(procedures.propertySetActive, {
+      Id: nv(id, 70),
+      Active: bit(active),
+      ActorId: uuid(user.id),
+    });
+    ["/", "/buy-properties", "/sell-properties"].forEach((p) =>
+      revalidatePath(p),
+    );
+    revalidatePath("/property/[slug]", "page");
+    return Response.json({ ok: true });
+  } catch (e) {
+    return apiError(e);
+  }
+}

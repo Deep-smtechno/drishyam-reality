@@ -523,6 +523,41 @@
   background: #fef3f2;
   color: var(--a-danger);
 }
+.adm-row-actions > button.adm-switch:not(.adm-btn) {
+  position: relative;
+  align-self: center;
+  width: 38px;
+  height: 22px;
+  margin: 0 6px;
+  border-radius: 999px;
+  background: #cfd4da;
+  transition: background 0.15s;
+}
+.adm-row-actions > button.adm-switch:not(.adm-btn):hover {
+  background: #bcc3ca;
+}
+.adm-row-actions > button.adm-switch[aria-checked="true"]:not(.adm-btn),
+.adm-row-actions > button.adm-switch[aria-checked="true"]:not(.adm-btn):hover {
+  background: #12b76a;
+}
+.adm-switch span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 25%);
+  transition: transform 0.15s;
+}
+.adm-switch[aria-checked="true"] span {
+  transform: translateX(16px);
+}
+.adm-switch:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 .adm-badge {
   display: inline-flex;
   align-items: center;

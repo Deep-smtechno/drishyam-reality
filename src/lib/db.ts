@@ -8,6 +8,7 @@ export const procedures = {
   propertiesList: "drishyam.usp_Properties_List",
   propertySave: "drishyam.usp_Property_Save",
   propertyArchive: "drishyam.usp_Property_Archive",
+  propertySetActive: "drishyam.usp_Property_SetActive",
   settingsGet: "drishyam.usp_Settings_Get",
   settingsSave: "drishyam.usp_Settings_Save",
   testimonialsList: "drishyam.usp_Testimonials_List",
